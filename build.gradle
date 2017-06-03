@@ -1,0 +1,175 @@
+
+def nexusurl = System.getProperty("nexusurl") ?: "${nexusurldefault}"
+
+def devrepourl="${nexusurl}/repository/maven-snapshots/"
+def relrepourl="${nexusurl}/repository/maven-releases/"
+def pubrepourl= "${nexusurl}/repository/maven-public/"
+
+
+
+println "nexus url : ${nexusurl}"
+
+
+buildscript {
+	ext {
+		springBootVersion = '1.5.3.RELEASE'
+		nexusurl = System.getProperty("nexusurl") ?: "http://192.168.81.66:8081/"
+		 pubrepourl= "${nexusurl}/repository/maven-public/"
+	}
+	repositories {
+		mavenLocal()
+		//maven { url "${pubrepourl}" }
+		maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+		mavenCentral()
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+	}
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse-wtp'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'maven'
+apply plugin: 'idea'
+
+
+group = "com.aop"
+def artifactId = "rop-component"
+
+
+version = "1.0.1-SNAPSHOT"
+
+
+
+def paramRelease =  project.properties.get("release")
+if("${paramRelease}" != "null"){
+	version = version.replace("-SNAPSHOT","")
+}
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+def repourl=devrepourl
+
+ if (!version.contains("SNAPSHOT")){
+ repourl=relrepourl
+ }
+ 
+springBoot {
+    mainClass = "com.xunxintech.ruyue.coach.RyCoachRopComponentApplication"
+}
+
+repositories {
+	mavenLocal()
+	//maven { url "${pubrepourl}" }
+	maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+	mavenCentral()
+}
+
+configurations {
+	providedRuntime
+	all*.exclude module: 'spring-boot-devtools'
+	all*.exclude group: 'javax.persistence', module: 'persistence-api'
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+ 
+artifacts {
+    archives sourcesJar
+}
+
+ sourceSets {
+    main {
+        java {
+            srcDir 'src/main/java'
+        }
+        resources {
+            srcDir 'src/main/resources'
+        }
+    }
+}
+
+
+dependencies {
+	compile('org.springframework.boot:spring-boot-starter')
+	// https://mvnrepository.com/artifact/org.springframework/spring-web
+	compile 'org.springframework:spring-web:4.3.8.RELEASE'
+	// https://mvnrepository.com/artifact/org.apache.tomcat.embed/tomcat-embed-core
+	compile 'org.apache.tomcat.embed:tomcat-embed-core:8.5.14'
+
+	//lombok
+	compile 'org.projectlombok:lombok:1.16.16'
+
+	compile group: 'org.hibernate.validator', name: 'hibernate-validator', version: '6.0.0.Beta2'
+
+	// fasterxml jackson
+   	compile 'com.fasterxml.jackson.core:jackson-core:2.8.4'
+   	compile 'com.fasterxml.jackson.core:jackson-databind:2.8.4'
+   	compile 'com.fasterxml.jackson.datatype:jackson-datatype-joda:2.8.4'
+   	compile 'com.fasterxml.jackson.module:jackson-module-parameter-names:2.8.4'
+   	compile 'javax.validation:validation-api:1.1.0.Final'
+   	
+	//ruyue coach common
+	//compile('com.xunxintech.ruyue.coach:ry-coach-common-encryption:1.0.2')
+	compile('com.xunxintech.ruyue.coach:ry-coach-common-io:1.1.35')
+	testCompile('org.springframework.boot:spring-boot-starter-test')
+}
+//gradle profiles param
+def pro =  project.properties.get("springProfiles")
+
+if("${pro}" != "null"){
+    test.systemProperty 'spring.profiles.active', "${pro}"
+	println "spring.profiles.active=${pro}"
+}
+
+task showTestTaskClasspath << {
+  test.classpath.each { println it }
+}
+
+task fatJar(type: Jar) {
+	baseName = "$artifactId"
+	version = "$project.version"
+	exclude('com/xunxintech/ruyue/coach/RyCoachDataAccessService*')	
+	exclude('com/xunxintech/ruyue/coach/account')
+	exclude('mapper/account')
+	exclude('config')
+	exclude('com/xunxintech/ruyue/coach/utils/PropertiesUtil*')
+	exclude('error*')
+    from {configurations.compile.filter{!it.name.startsWith('ry-coach-common') && !it.name.startsWith('lombok')}.collect { it.isDirectory() ? it : zipTree(it)}}
+    with jar
+}
+
+
+install{
+    repositories{
+    	mavenInstaller {
+	        pom.version = "$project.version"
+	        pom.artifactId = "$artifactId"
+	        pom.groupId = "$project.group"
+	    }
+    
+    
+    }
+
+}
+//上传到nexus
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: repourl)
+            {
+                authentication(userName: "$nexususer", password: "$nexuspwd")
+            }
+            pom.version = "$project.version"
+            pom.artifactId = "$artifactId"
+            pom.groupId = "$project.group"
+        }
+    }
+}
+//fatJar.dependsOn javadocJar
+//fatJar.mustRunAfter jar
+//install.dependsOn fatJar
+uploadArchives.dependsOn install

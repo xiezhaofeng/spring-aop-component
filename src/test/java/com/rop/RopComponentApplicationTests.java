@@ -1,4 +1,4 @@
-package com.xunxintech.ruyue.coach.rycoachropcomponent;
+package com.rop;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -7,7 +7,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class RyCoachRopComponentApplicationTests {
+public class RopComponentApplicationTests {
 
 	@Test
 	public void contextLoads() {

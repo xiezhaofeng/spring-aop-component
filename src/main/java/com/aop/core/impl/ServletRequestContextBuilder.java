@@ -39,7 +39,6 @@ import com.aop.enums.HttpAction;
   * @date 2017年5月27日 下午3:10:21 
   * @version   
   *
-  * @Copyrigth  版权所有 (C) 2017 广州讯心信息科技有限公司.
   *
  */
 public class ServletRequestContextBuilder implements RequestContextBuilder {

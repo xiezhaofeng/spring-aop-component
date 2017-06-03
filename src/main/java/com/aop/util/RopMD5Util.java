@@ -21,7 +21,6 @@ import com.aop.exception.RopException;
   * @date 2017年5月31日 上午10:53:36 
   * @version   
   *
-  * @Copyrigth  版权所有 (C) 2017 广州讯心信息科技有限公司.
   *
  */
 public class RopMD5Util

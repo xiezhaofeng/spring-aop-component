@@ -24,19 +24,24 @@ public enum MessageFormat {
 
 	public static MessageFormat getFormat(String value)
 	{
-		if (StringUtils.hasText(value))
+		return getFormat(value, null	);
+	}
+	public static MessageFormat getFormat(String format, MessageFormat defaultFormat)
+	{
+		if (StringUtils.hasText(format))
 		{
 			try
 			{
-				return MessageFormat.valueOf(value.toLowerCase());
+				return MessageFormat.valueOf(format.toLowerCase());
 			}
 			catch (IllegalArgumentException e)
 			{
 
 			}
 		}
-		return null;
+		return defaultFormat;
 	}
+
 	public static MessageFormat getFormatValue(String value, MessageFormat defaultFormat)
 	{
 		if (StringUtils.hasText(value))
@@ -71,11 +76,5 @@ public enum MessageFormat {
         }
     }
 
-	public static MessageFormat getFormat(String format, MessageFormat defaultFormat)
-	{
-		MessageFormat f = getFormat(format);
-
-		return f == null ? defaultFormat : f;
-	}
 
 }

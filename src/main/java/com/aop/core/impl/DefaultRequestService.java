@@ -16,6 +16,7 @@ import com.aop.core.ServiceMethodDefinition;
 import com.aop.core.ServiceMethodHandler;
 import com.aop.core.SystemParameterNames;
 import com.aop.enums.SignType;
+import com.aop.marshaller.MessageFormatMarshaller;
 import com.aop.util.RopMD5Util;
 import com.xunxintech.ruyue.coach.io.json.JSONUtil;
 import com.xunxintech.ruyue.coach.io.string.StringUtil;
@@ -25,6 +26,8 @@ public class DefaultRequestService implements RequestService
 {
 
 	private RopContext ropContext;
+
+	private MessageFormatMarshaller mesageFormatMarshaller;
 
 	private InfoService infoService;
 
@@ -86,8 +89,7 @@ public class DefaultRequestService implements RequestService
 
 		MessageFormat responseFormat = MessageFormat.getFormat(requestContext.getFormat(), requestFormat);
 
-		if (MessageFormat.json.equals(responseFormat)) { return JSONUtil.toJackson(result); }
-		return XMLParser.toXmlString(result);
+		return mesageFormatMarshaller.messageFormat(responseFormat, result);
 	}
 
 }

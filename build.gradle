@@ -56,7 +56,7 @@ def repourl=devrepourl
  }
  
 springBoot {
-    mainClass = "com.xunxintech.ruyue.coach.RyCoachRopComponentApplication"
+    mainClass = "com.rop.RopComponentApplication"
 }
 
 repositories {

@@ -26,3 +26,4 @@ nbdist/
 bin/
 gradle/
 gradlew*
+out/

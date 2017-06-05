@@ -1,9 +1,8 @@
 package com.aop.marshaller;
 
+import com.aop.core.AbstractRopRequest;
 import com.aop.core.RopRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.xunxintech.ruyue.coach.io.json.JSONUtil;
-import com.xunxintech.ruyue.coach.io.xml.XMLParser;
 
 import java.io.IOException;
 
@@ -13,11 +12,11 @@ import java.io.IOException;
 public class XmlMarshallerService implements MarshallerService {
     @Override
     public String format(Object object) throws JsonProcessingException {
-        return XMLParser.toXmlString(object);
+        return null;//XMLParser.toXmlString(object);
     }
 
     @Override
-    public <T> T readvalue(String param, Class<? extends RopRequest> requestType) throws IOException {
-        return XMLParser.xmlMapper.readValue(param, (Class<T>) requestType);
+    public AbstractRopRequest readvalue(String param, Class<? extends RopRequest> requestType) throws IOException {
+        return null;//XMLParser.xmlMapper.readValue(param, (Class<T>) requestType);
     }
 }

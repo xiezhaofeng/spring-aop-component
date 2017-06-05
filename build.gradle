@@ -114,7 +114,7 @@ dependencies {
    	
 	//ruyue coach common
 	//compile('com.xunxintech.ruyue.coach:ry-coach-common-encryption:1.0.2')
-	compile('com.xunxintech.ruyue.coach:ry-coach-common-io:1.1.35')
+	//compile('com.xunxintech.ruyue.coach:ry-coach-common-io:1.1.35')
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 }
 //gradle profiles param
@@ -132,7 +132,7 @@ task showTestTaskClasspath << {
 task fatJar(type: Jar) {
 	baseName = "$artifactId"
 	version = "$project.version"
-	exclude('com/xunxintech/ruyue/coach/RyCoachDataAccessService*')	
+	exclude('com/xunxintech/ruyue/coach/RopComponentApplication*')
 	exclude('com/xunxintech/ruyue/coach/account')
 	exclude('mapper/account')
 	exclude('config')

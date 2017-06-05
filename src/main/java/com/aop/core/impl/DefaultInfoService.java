@@ -1,8 +1,7 @@
 package com.aop.core.impl;
 
-import org.apache.commons.codec.digest.DigestUtils;
-
 import com.aop.core.InfoService;
+import com.aop.util.RopUtil;
 
 /**
  * 
@@ -21,7 +20,7 @@ public class DefaultInfoService implements InfoService
 	@Override
 	public String getSecret(String token)
 	{
-		return DigestUtils.md5Hex(token);
+		return RopUtil.md5(token);
 	}
 
 }

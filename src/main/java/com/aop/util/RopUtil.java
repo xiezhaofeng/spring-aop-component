@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.aop.enums.SignType;
 import com.aop.exception.RopException;
 
 /**
@@ -23,7 +24,7 @@ import com.aop.exception.RopException;
   *
   *
  */
-public class RopMD5Util
+public class RopUtil
 {
 	 private static final String UTF_8 = "utf-8";
 
@@ -68,8 +69,16 @@ public class RopMD5Util
         } catch (IOException e) {
             throw new RopException(e);
         }
-    }    
+    }
 
+    public static String md5(String value){
+        try {
+            byte[] sha1Digest = getDigest(value, SignType.MD5.getValue());
+            return byte2hex(sha1Digest);
+        } catch (IOException e) {
+            throw new RopException(e);
+        }
+    }
     public static String utf8Encoding(String value, String sourceCharsetName) {
         try {
             return new String(value.getBytes(sourceCharsetName), UTF_8);
@@ -113,4 +122,42 @@ public class RopMD5Util
         return uuid.toString().toUpperCase();
     }
 
+    public static boolean equals(String... strs) {
+        if(strs == null) {
+            return false;
+        } else if(strs.length < 2) {
+            throw new RuntimeException("Parameters can not be less than 2");
+        } else {
+            for(int i = 1; i < strs.length; ++i) {
+                if(!equals(strs[i - 1], strs[i])) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    }
+
+    public static boolean equalsIgnoreCase(String... strs) {
+        if(strs == null) {
+            return false;
+        } else if(strs.length < 2) {
+            throw new RuntimeException("Parameters can not be less than 2");
+        } else {
+            for(int i = 1; i < strs.length; ++i) {
+                if(!equalsIgnoreCase(strs[i - 1], strs[i])) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    }
+    public static boolean notEquals(String str1, String str2) {
+        return !equals(str1, str2);
+    }
+
+    public static boolean notEqualsIgnoreCase(String str1, String str2) {
+        return !equalsIgnoreCase(str1, str2);
+    }
 }

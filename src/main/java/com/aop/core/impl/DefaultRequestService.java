@@ -7,9 +7,7 @@ import com.aop.exception.RopException;
 import com.aop.marshaller.JsonMarshallerService;
 import com.aop.marshaller.MarshallerManager;
 import com.aop.marshaller.XmlMarshallerService;
-import com.aop.util.RopMD5Util;
-import com.xunxintech.ruyue.coach.io.string.StringUtil;
-import org.apache.commons.collections.CollectionUtils;
+import com.aop.util.RopUtil;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
@@ -72,9 +70,9 @@ public class DefaultRequestService implements RequestService {
 			paramValues.put(SystemParameterNames.PARAM, param);
 
 			SignType signType = SignType.get(requestContext.getSignType());
-			String sign = RopMD5Util.sign(paramValues, infoService.getSecret(requestContext.getToken()), signType.getValue());
+			String sign = RopUtil.sign(paramValues, infoService.getSecret(requestContext.getToken()), signType.getValue());
 
-			if (StringUtil.notEquals(sign, requestContext.getSign())) {
+			if (RopUtil.notEquals(sign, requestContext.getSign())) {
 				throw new RopException("signature failed");
 			}
 		}
@@ -85,11 +83,7 @@ public class DefaultRequestService implements RequestService {
 		ServiceMethodHandler serviceMethodHandler = requestContext.getServiceMethodHandler();
 
 		AbstractRopRequest requestObject  = marshallerManager.readvalue(param, serviceMethodHandler.getRequestType(), requestFormat);
-//		if (MessageFormat.json.equals(requestFormat)) {
-//			requestObject = (AbstractRopRequest) JSONUtil.objectMapper.readValue(param, serviceMethodHandler.getRequestType());
-//		} else {
-//			requestObject = (AbstractRopRequest) XMLParser.xmlMapper.readValue(param, serviceMethodHandler.getRequestType());
-//		}
+
 		validate(requestObject);
 
 		requestObject.setRopRequestContext(requestContext);
@@ -104,7 +98,7 @@ public class DefaultRequestService implements RequestService {
 	public  <T> void validate(T obj){
 		String error = EMPTY_STRING;
 		Set<ConstraintViolation<T>> set = validator.validate(obj);
-		if( CollectionUtils.isNotEmpty(set) ){
+		if(set != null && !set.isEmpty() ){
 			for(ConstraintViolation<T> cv : set){
 				error += cv.getPropertyPath().toString()+cv.getMessage()+ SEMICOLON;
 			}

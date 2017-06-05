@@ -1,5 +1,6 @@
 package com.aop.marshaller;
 
+import com.aop.core.AbstractRopRequest;
 import com.aop.core.RopRequest;
 import com.aop.enums.MessageFormat;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -27,7 +28,7 @@ public class MarshallerManager {
         return getMarshaller(format).format(object );
     }
 
-    public <T> T readvalue(String param, Class<? extends RopRequest> requestType, MessageFormat format) throws IOException {
+    public AbstractRopRequest readvalue(String param, Class<? extends RopRequest> requestType, MessageFormat format) throws IOException {
         return getMarshaller(format).readvalue(param,requestType);
     }
 }

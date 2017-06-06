@@ -7,15 +7,14 @@ package com.aop.core.impl;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.UUID;
 
-import com.aop.enums.MessageFormat;
 import com.aop.core.RopContext;
 import com.aop.core.RopRequest;
 import com.aop.core.RopRequestContext;
 import com.aop.core.ServiceMethodDefinition;
 import com.aop.core.ServiceMethodHandler;
 import com.aop.enums.HttpAction;
+import com.aop.enums.MessageFormat;
 
 /**
  * @author CXH
@@ -71,7 +70,7 @@ public class SimpleRopRequestContext implements RopRequestContext {
 
     private Map<String, String> allParams;
 
-    private String requestId = UUID.randomUUID().toString();
+    private String requestId;
 
 
     public long getServiceBeginTime() {
@@ -297,6 +296,11 @@ public class SimpleRopRequestContext implements RopRequestContext {
 	public void setSignType(String signType)
 	{
 		this.signType = signType;
+	}
+	
+	public void setRequestId(String requestId)
+	{
+		this.requestId = requestId;
 	}
     
     

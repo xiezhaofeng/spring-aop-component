@@ -160,4 +160,14 @@ public class RopUtil
     public static boolean notEqualsIgnoreCase(String str1, String str2) {
         return !equalsIgnoreCase(str1, str2);
     }
+    
+    public static boolean equals(String str1, String str2)
+	{
+		return str1 == null && str2 == null ? true : str1 == null ? false : str2 == null ? false : str1.equals(str2);
+	}
+
+	public static boolean equalsIgnoreCase(String str1, String str2)
+	{
+		return str1 == null && str2 == null ? true : str1 == null ? false : str2 == null ? false : str1.equalsIgnoreCase(str2);
+	}
 }

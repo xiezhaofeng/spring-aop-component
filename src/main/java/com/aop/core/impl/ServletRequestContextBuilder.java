@@ -21,7 +21,6 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.ServletRequestDataBinder;
 
 import com.aop.core.AbstractRopRequest;
-import com.aop.enums.MessageFormat;
 import com.aop.core.RequestContextBuilder;
 import com.aop.core.RopContext;
 import com.aop.core.RopRequest;
@@ -29,16 +28,19 @@ import com.aop.core.RopRequestContext;
 import com.aop.core.ServiceMethodHandler;
 import com.aop.core.SystemParameterNames;
 import com.aop.enums.HttpAction;
+import com.aop.enums.MessageFormat;
+import com.aop.exception.RopException;
 
 /**
  * 
   * @Title: ServletRequestContextBuilder.java 
-  * @Package com.aop.core.impl
+  * @Package com.xunxintech.ruyue.coach.aop.impl 
   * @Description  TODO
   * @author  XZF
   * @date 2017年5月27日 下午3:10:21 
   * @version   
   *
+  * @Copyrigth  版权所有 (C) 2017 广州讯心信息科技有限公司.
   *
  */
 public class ServletRequestContextBuilder implements RequestContextBuilder {
@@ -63,39 +65,14 @@ public class ServletRequestContextBuilder implements RequestContextBuilder {
     }
 
     public SimpleRopRequestContext buildBySysParams(RopContext ropContext, HttpServletRequest request,HttpServletResponse response) {
-
-        SimpleRopRequestContext requestContext = new SimpleRopRequestContext(ropContext);
-
-        //设置请求对象及参数列表
-        requestContext.setRawRequestObject(request);
-        if (response != null) {
-            requestContext.setRawResponseObject(response);
-        }
-        requestContext.setAllParams(getRequestParams(request));
-        requestContext.setIp(getRemoteAddr(request)); //感谢melin所指出的BUG
-
-        //设置服务的系统级参数
-        requestContext.setAppId(request.getParameter(SystemParameterNames.APP_ID));
-        requestContext.setSessionId(request.getParameter(SystemParameterNames.SESSION_ID));
-        requestContext.setMethod(request.getParameter(SystemParameterNames.METHOD));
-        requestContext.setToken(request.getParameter(SystemParameterNames.TOKEN));
-        requestContext.setTimestamp(Long.valueOf(request.getParameter(SystemParameterNames.TIMESTAMP)));
-        requestContext.setVersion(request.getParameter(SystemParameterNames.VERSION));
-        requestContext.setLocale(getLocale(request));
-        requestContext.setFormat(getFormat(request));
-        requestContext.setMessageFormat(getResponseFormat(request));
-        requestContext.setSign(request.getParameter(SystemParameterNames.SIGN));
-        requestContext.setHttpAction(HttpAction.fromValue(request.getMethod()));
-
-        //设置服务处理器
-        ServiceMethodHandler serviceMethodHandler =
-                ropContext.getServiceMethodHandler(requestContext.getMethod(), requestContext.getVersion());
-        requestContext.setServiceMethodHandler(serviceMethodHandler);
-
-        return requestContext;
+        String method = request.getParameter(SystemParameterNames.METHOD);
+        String version = request.getParameter(SystemParameterNames.VERSION);
+        MessageFormat requestFormat = MessageFormat.getFormatValue(request.getContentType());
+		if (requestFormat == null) { throw new RopException("Unsupported contentType request type"); }
+        return buildBySysParams(ropContext, request, response, method, version, requestFormat, "");
     }
     
-    public SimpleRopRequestContext buildBySysParams(RopContext ropContext, HttpServletRequest request,HttpServletResponse response, String method, String version) {
+    public SimpleRopRequestContext buildBySysParams(RopContext ropContext, HttpServletRequest request,HttpServletResponse response, String method, String version, MessageFormat format, String methodPrefix) {
 
         SimpleRopRequestContext requestContext = new SimpleRopRequestContext(ropContext);
 
@@ -112,23 +89,38 @@ public class ServletRequestContextBuilder implements RequestContextBuilder {
         requestContext.setSessionId(request.getParameter(SystemParameterNames.SESSION_ID));
         requestContext.setMethod(method);
         requestContext.setToken(request.getParameter(SystemParameterNames.TOKEN));
-        requestContext.setTimestamp(Long.valueOf(request.getParameter(SystemParameterNames.TIMESTAMP)));
         requestContext.setVersion(version);
         requestContext.setLocale(getLocale(request));
-        requestContext.setFormat(getFormat(request));
-        requestContext.setMessageFormat(getResponseFormat(request));
+        requestContext.setFormat(format.toString());
+        requestContext.setRequestId(request.getHeader(SystemParameterNames.REQUEST_ID));
+
+		boolean isJson = MessageFormat.json.equals(format);
+		try
+		{
+			requestContext.setTimestamp(Long.valueOf(request.getParameter(SystemParameterNames.TIMESTAMP)));
+		}
+		catch (Exception e)
+		{
+			throw new RopException("timestamp is Unverified", isJson);
+		}
+        
+        requestContext.setMessageFormat(format);
         requestContext.setSign(request.getParameter(SystemParameterNames.SIGN));
         requestContext.setHttpAction(HttpAction.fromValue(request.getMethod()));
+        requestContext.setSignType(request.getParameter(SystemParameterNames.SIGN_TYPE));
 
         //设置服务处理器
-        ServiceMethodHandler serviceMethodHandler =
-                ropContext.getServiceMethodHandler(requestContext.getMethod(), requestContext.getVersion());
+        ServiceMethodHandler serviceMethodHandler = ropContext.getServiceMethodHandler(methodPrefix + method, requestContext.getVersion());
+        if(serviceMethodHandler == null){
+        	throw new RopException("method not exist", isJson);
+        }
         requestContext.setServiceMethodHandler(serviceMethodHandler);
 
         return requestContext;
     }
 
-    private String getRemoteAddr(HttpServletRequest request) {
+
+	private String getRemoteAddr(HttpServletRequest request) {
         String remoteIp = request.getHeader(X_REAL_IP); //nginx反向代理
         if (StringUtils.hasText(remoteIp)) {
             return remoteIp;
@@ -171,14 +163,14 @@ public class ServletRequestContextBuilder implements RequestContextBuilder {
     }
 
 
-    private String getFormat(HttpServletRequest servletRequest) {
-        String messageFormat = servletRequest.getParameter(SystemParameterNames.FORMAT);
-        if (messageFormat == null) {
-            return MessageFormat.xml.name();
-        } else {
-            return messageFormat;
-        }
-    }
+//    private String getFormat(HttpServletRequest servletRequest) {
+//        String messageFormat = servletRequest.getParameter(SystemParameterNames.FORMAT);
+//        if (messageFormat == null) {
+//            return MessageFormat.xml.name();
+//        } else {
+//            return messageFormat;
+//        }
+//    }
 
     public static Locale getLocale(HttpServletRequest webRequest) {
         if (webRequest.getParameter(SystemParameterNames.LOCALE) != null) {

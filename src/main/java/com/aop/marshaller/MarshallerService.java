@@ -1,11 +1,10 @@
 package com.aop.marshaller;
 
+import java.io.IOException;
+
 import com.aop.core.AbstractRopRequest;
 import com.aop.core.RopRequest;
-import com.aop.enums.MessageFormat;
 import com.fasterxml.jackson.core.JsonProcessingException;
-
-import java.io.IOException;
 
 /**
  * Created by jers on 2017/6/4.

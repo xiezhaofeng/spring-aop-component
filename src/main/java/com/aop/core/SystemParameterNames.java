@@ -45,6 +45,13 @@ public class SystemParameterNames {
     
     //参数KEY
     public static final String PARAM = "param";
+    
+    //请求ID
+    public static final String REQUEST_ID = "RequestID";
+    /**
+     * 签名类型
+     */
+	public static final String SIGN_TYPE = "signType";
 
 }
 

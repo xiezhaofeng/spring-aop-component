@@ -17,5 +17,5 @@ import javax.servlet.http.HttpServletResponse;
  */
 public interface RequestService
 {
-	String processRequest(HttpServletRequest request, HttpServletResponse response, String method, String v, String param) throws Exception;
+	String processRequest(HttpServletRequest request, HttpServletResponse response, String method, String v, String param, String methodPrefix) throws Exception;
 }

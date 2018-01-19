@@ -1,20 +1,8 @@
-
-def nexusurl = System.getProperty("nexusurl") ?: "${nexusurldefault}"
-
-def devrepourl="${nexusurl}/repository/maven-snapshots/"
-def relrepourl="${nexusurl}/repository/maven-releases/"
-def pubrepourl= "${nexusurl}/repository/maven-public/"
-
-
-
-println "nexus url : ${nexusurl}"
-
-
 buildscript {
 	ext {
-		springBootVersion = '1.5.3.RELEASE'
-		nexusurl = System.getProperty("nexusurl") ?: "http://192.168.81.66:8081/"
-		 pubrepourl= "${nexusurl}/repository/maven-public/"
+		springBootVersion = '1.5.9.RELEASE'
+//		nexusurl = System.getProperty("nexusurl") ?: "http://192.168.81.66:8081/"
+//		 pubrepourl= "${nexusurl}/repository/maven-public/"
 	}
 	repositories {
 		mavenLocal()
@@ -34,7 +22,7 @@ apply plugin: 'maven'
 apply plugin: 'idea'
 
 
-group = "com.aop"
+group = "com.rop"
 def artifactId = "rop-component"
 
 
@@ -49,10 +37,10 @@ if("${paramRelease}" != "null"){
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
-def repourl=devrepourl
+//def repourl=devrepourl
 
  if (!version.contains("SNAPSHOT")){
- repourl=relrepourl
+// repourl=relrepourl
  }
  
 springBoot {
@@ -95,15 +83,10 @@ artifacts {
 
 dependencies {
 	compile('org.springframework.boot:spring-boot-starter')
-	// https://mvnrepository.com/artifact/org.springframework/spring-web
-	compile 'org.springframework:spring-web:4.3.8.RELEASE'
-	// https://mvnrepository.com/artifact/org.apache.tomcat.embed/tomcat-embed-core
-	compile 'org.apache.tomcat.embed:tomcat-embed-core:8.5.14'
+	compile('org.springframework.boot:spring-boot-starter-web')
 
 	//lombok
 	compile 'org.projectlombok:lombok:1.16.16'
-
-	compile group: 'org.hibernate.validator', name: 'hibernate-validator', version: '6.0.0.Beta2'
 
 	// fasterxml jackson
    	compile 'com.fasterxml.jackson.core:jackson-core:2.8.4'
@@ -113,8 +96,6 @@ dependencies {
    	compile 'javax.validation:validation-api:1.1.0.Final'
    	
 	//ruyue coach common
-	//compile('com.xunxintech.ruyue.coach:ry-coach-common-encryption:1.0.2')
-	//compile('com.xunxintech.ruyue.coach:ry-coach-common-io:1.1.35')
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 }
 //gradle profiles param
@@ -132,11 +113,7 @@ task showTestTaskClasspath << {
 task fatJar(type: Jar) {
 	baseName = "$artifactId"
 	version = "$project.version"
-	exclude('com/xunxintech/ruyue/coach/RopComponentApplication*')
-	exclude('com/xunxintech/ruyue/coach/account')
-	exclude('mapper/account')
 	exclude('config')
-	exclude('com/xunxintech/ruyue/coach/utils/PropertiesUtil*')
 	exclude('error*')
     from {configurations.compile.filter{!it.name.startsWith('ry-coach-common') && !it.name.startsWith('lombok')}.collect { it.isDirectory() ? it : zipTree(it)}}
     with jar
@@ -156,20 +133,20 @@ install{
 
 }
 //上传到nexus
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            repository(url: repourl)
-            {
-                authentication(userName: "$nexususer", password: "$nexuspwd")
-            }
-            pom.version = "$project.version"
-            pom.artifactId = "$artifactId"
-            pom.groupId = "$project.group"
-        }
-    }
-}
+//uploadArchives {
+//    repositories {
+//        mavenDeployer {
+//            repository(url: repourl)
+//            {
+//                authentication(userName: "$nexususer", password: "$nexuspwd")
+//            }
+//            pom.version = "$project.version"
+//            pom.artifactId = "$artifactId"
+//            pom.groupId = "$project.group"
+//        }
+//    }
+//}
 //fatJar.dependsOn javadocJar
 //fatJar.mustRunAfter jar
 //install.dependsOn fatJar
-uploadArchives.dependsOn install
+//uploadArchives.dependsOn install

@@ -27,3 +27,4 @@ bin/
 gradle/
 gradlew*
 out/
+classes/production/spring-aop-component/application.yml

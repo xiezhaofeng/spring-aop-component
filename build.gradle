@@ -1,12 +1,20 @@
+def nexusurl = System.getProperty("nexusurl") ?: "${nexusurldefault}"
+
+def devrepourl="${nexusurl}/repository/maven-snapshots/"
+def relrepourl="${nexusurl}/repository/maven-releases/"
+def pubrepourl= "${nexusurl}/repository/maven-public/"
+
+println "nexus url : ${nexusurl}"
+
 buildscript {
 	ext {
 		springBootVersion = '1.5.9.RELEASE'
-//		nexusurl = System.getProperty("nexusurl") ?: "http://192.168.81.66:8081/"
-//		 pubrepourl= "${nexusurl}/repository/maven-public/"
+		nexusurl = System.getProperty("nexusurl") ?: "http://192.168.81.66:8081/"
+		pubrepourl= "${nexusurl}/repository/maven-public/"
 	}
 	repositories {
 		mavenLocal()
-		//maven { url "${pubrepourl}" }
+		maven { url "${pubrepourl}" }
 		maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
 		mavenCentral()
 	}
@@ -37,10 +45,10 @@ if("${paramRelease}" != "null"){
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
-//def repourl=devrepourl
+def repourl=devrepourl
 
  if (!version.contains("SNAPSHOT")){
-// repourl=relrepourl
+ repourl=relrepourlC
  }
  
 springBoot {
@@ -49,7 +57,7 @@ springBoot {
 
 repositories {
 	mavenLocal()
-	//maven { url "${pubrepourl}" }
+	maven { url "${pubrepourl}" }
 	maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
 	mavenCentral()
 }
@@ -133,20 +141,20 @@ install{
 
 }
 //上传到nexus
-//uploadArchives {
-//    repositories {
-//        mavenDeployer {
-//            repository(url: repourl)
-//            {
-//                authentication(userName: "$nexususer", password: "$nexuspwd")
-//            }
-//            pom.version = "$project.version"
-//            pom.artifactId = "$artifactId"
-//            pom.groupId = "$project.group"
-//        }
-//    }
-//}
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: repourl)
+            {
+                authentication(userName: "$nexususer", password: "$nexuspwd")
+            }
+            pom.version = "$project.version"
+            pom.artifactId = "$artifactId"
+            pom.groupId = "$project.group"
+        }
+    }
+}
 //fatJar.dependsOn javadocJar
-//fatJar.mustRunAfter jar
-//install.dependsOn fatJar
-//uploadArchives.dependsOn install
+fatJar.mustRunAfter jar
+install.dependsOn fatJar
+uploadArchives.dependsOn install

@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.rop.enums.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -31,11 +32,6 @@ import com.rop.core.ServiceMethodHandler;
 import com.rop.core.SystemParameterNames;
 import com.rop.annotation.RopMethod;
 import com.rop.annotation.RopService;
-import com.rop.enums.IgnoreSign;
-import com.rop.enums.IgnoreSignType;
-import com.rop.enums.NeedInSessionType;
-import com.rop.enums.ObsoletedType;
-import com.rop.enums.Temporary;
 
 /**
  * <pre>
@@ -180,6 +176,9 @@ public class DefaultRopContext implements RopContext
 
 						// 3.set fileItemFieldNames
 						// serviceMethodHandler.setUploadFileFieldNames(getFileItemFieldNames(serviceMethodHandler.getRequestType()));
+
+						//4 .set collect log
+						serviceMethodHandler.setCollectType(CollectType.DEFAULT.equals(serviceMethod.collectLog()) ? serviceMethodBean.collectLog() : serviceMethod.collectLog());
 
 						addServiceMethod(definition.getMethod(), definition.getVersion(), serviceMethodHandler, definition.getModule());
 

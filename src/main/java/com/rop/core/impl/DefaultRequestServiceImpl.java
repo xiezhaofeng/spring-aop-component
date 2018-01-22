@@ -159,7 +159,7 @@ public class DefaultRequestServiceImpl implements RequestService
 		if(logger.isDebugEnabled()){
 			logger.debug("validatorSign sign:{}, signType:{}", sign, signType);
 		}
-		if (RopUtil.notEquals(sign, requestContext.getSign())) { throw new RopException(RopConstant.SIGNATURE_FAILED_MESSAGE); }
+		if (RopUtil.notEqualsIgnoreCase(sign, requestContext.getSign())) { throw new RopException(RopConstant.SIGNATURE_FAILED_MESSAGE); }
 	}
 
 	public <T> void validateRequestObject(T obj)

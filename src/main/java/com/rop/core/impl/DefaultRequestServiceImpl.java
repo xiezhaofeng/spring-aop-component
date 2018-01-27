@@ -80,10 +80,8 @@ public class DefaultRequestServiceImpl implements RequestService
 
 		AbstractRopRequest requestObject = marshallerManager.readvalue(param, serviceMethodHandler.getRequestType(), requestFormat);
 
-		validateRequestObject(requestObject);
-
 		requestObject.setRopRequestContext(requestContext);
-
+		//去除换行符
 		param = handleParam(param);
 
 		Object result = null;
@@ -91,6 +89,9 @@ public class DefaultRequestServiceImpl implements RequestService
 		String responseString = RopConstant.EMPTY_STRING;
 
 		try{
+			//验证输入参数
+			validateRequestObject(requestObject);
+
 			result = serviceMethodHandler.getHandlerMethod().invoke(serviceMethodHandler.getHandler(), requestObject);
 			responseString = marshallerManager.messageFormat(requestFormat, result);
 		}catch(Exception e){

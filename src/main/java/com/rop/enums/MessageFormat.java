@@ -7,50 +7,69 @@ import org.springframework.util.StringUtils;
 
 /**
  * 支持的响应的格式类型
+ * @author xzf
  */
 public enum MessageFormat {
 
-    xml("application/xml"), json("application/json"), stream("application/json");
-    
-    private String value;
-    
-    private MessageFormat(String v){
-    	value = v;
-    }
+	/**
+	 * application/xml
+	 */
+	xml("application/xml"),
+	/**
+	 * application/json
+	 */
+	json("application/json"),
+	/**
+	 * application/stream
+	 */
+	stream("application/stream");
 
-    public String getValue(){
-    	return value;
-    }
+	private String value;
+
+	MessageFormat(String v){
+		value = v;
+	}
+
+	public String getValue(){
+		return value;
+	}
 
 	public static MessageFormat getFormat(String value)
 	{
-		return getFormat(value, null	);
-	}
-	public static MessageFormat getFormat(String format, MessageFormat defaultFormat)
-	{
-		if (StringUtils.hasText(format))
+		if (StringUtils.hasText(value))
 		{
 			try
 			{
-				return MessageFormat.valueOf(format.toLowerCase());
+				return MessageFormat.valueOf(value.toLowerCase());
 			}
 			catch (IllegalArgumentException e)
 			{
 
 			}
 		}
-		return defaultFormat;
+		return null;
 	}
+	public static MessageFormat getFormatValue(String value) {
 
-	public static MessageFormat getFormatValue(String value, MessageFormat defaultFormat)
-	{
+		return getFormatValue(value, null);
+	}
+	/**
+	 *
+	 * @Title getFormatValue
+	 * @Description 根据content-type获取format，如果为空则返回默认format
+	 * @param value
+	 * @param defaultFormat
+	 * @return MessageFormat
+	 * @throws
+	 */
+	public static MessageFormat getFormatValue(String value, MessageFormat defaultFormat) {
 		if (StringUtils.hasText(value))
 		{
 			try
 			{
 				for (MessageFormat mf : MessageFormat.values())
 				{
-					if (mf.getValue().equalsIgnoreCase(value)) { return mf; }
+					if (value.toLowerCase().contains(mf.value)) { return mf; }
 				}
 			}
 			catch (IllegalArgumentException e)
@@ -59,22 +78,25 @@ public enum MessageFormat {
 		}
 		return defaultFormat;
 	}
-    public static MessageFormat getFormatValue(String value) {
-        return getFormatValue(value, null);
-    }
 
-    public static boolean isValidFormat(String value) {
-        if (!StringUtils.hasText(value)) {
-            return true;
-        }else{
-            try {
-                MessageFormat.valueOf(value.toLowerCase());
-                return true;
-            } catch (IllegalArgumentException e) {
-                return false;
-            }
-        }
-    }
+	public static boolean isValidFormat(String value) {
+		if (!StringUtils.hasText(value)) {
+			return true;
+		}else{
+			try {
+				MessageFormat.valueOf(value.toLowerCase());
+				return true;
+			} catch (IllegalArgumentException e) {
+				return false;
+			}
+		}
+	}
 
+	public static MessageFormat getFormat(String format, MessageFormat defaultFormat)
+	{
+		MessageFormat f = getFormat(format);
+
+		return f == null ? defaultFormat : f;
+	}
 
 }

@@ -12,6 +12,8 @@ import java.util.UUID;
 
 import com.rop.enums.SignType;
 import com.rop.exception.RopException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -26,7 +28,7 @@ import com.rop.exception.RopException;
  */
 public class RopUtil
 {
-	 private static final String UTF_8 = "utf-8";
+	 private static Logger logger = LoggerFactory.getLogger(RopUtil.class);
 
 	/**
      * 使用<code>secret</code>对paramValues按以下算法进行签名： <br/>
@@ -38,6 +40,22 @@ public class RopUtil
      */
     public static String sign(Map<String, String> paramValues, String secret, String signType) {
         return sign(paramValues,null,secret, signType);
+    }
+    /**
+     * 
+     * @Title md5
+     * @Description TODO
+     * @param value
+     * @return String   
+     * @throws
+     */
+    public static String md5(String value){
+        try {
+            byte[] sha1Digest = getDigest(value, SignType.MD5.getValue());
+            return byte2hex(sha1Digest);
+        } catch (IOException e) {
+            throw new RopException(e);
+        }
     }
 
     /**
@@ -59,29 +77,21 @@ public class RopUtil
             }
             Collections.sort(paramNames);
 
-            sb.append(secret);
             for (String paramName : paramNames) {
-                sb.append(paramName).append(paramValues.get(paramName));
+                sb.append(paramName).append("=").append(paramValues.get(paramName)).append("&");
             }
-            sb.append(secret);
+            sb.append("key=").append(secret);
+            logger.debug("sign String:{}, signType:{}", sb.toString(), signType);
             byte[] sha1Digest = getDigest(sb.toString(), signType);
             return byte2hex(sha1Digest);
         } catch (IOException e) {
             throw new RopException(e);
         }
-    }
+    }    
 
-    public static String md5(String value){
-        try {
-            byte[] sha1Digest = getDigest(value, SignType.MD5.getValue());
-            return byte2hex(sha1Digest);
-        } catch (IOException e) {
-            throw new RopException(e);
-        }
-    }
     public static String utf8Encoding(String value, String sourceCharsetName) {
         try {
-            return new String(value.getBytes(sourceCharsetName), UTF_8);
+            return new String(value.getBytes(sourceCharsetName), RopConstant.UTF_8);
         } catch (UnsupportedEncodingException e) {
             throw new IllegalArgumentException(e);
         }
@@ -91,7 +101,7 @@ public class RopUtil
         byte[] bytes = null;
         try {
             MessageDigest md = MessageDigest.getInstance(signType);
-            bytes = md.digest(data.getBytes(UTF_8));
+            bytes = md.digest(data.getBytes(RopConstant.UTF_8));
         } catch (GeneralSecurityException gse) {
             throw new IOException(gse.getMessage());
         }
@@ -112,7 +122,7 @@ public class RopUtil
             if (hex.length() == 1) {
                 sign.append("0");
             }
-            sign.append(hex.toUpperCase());
+            sign.append(hex);
         }
         return sign.toString();
     }
@@ -121,11 +131,11 @@ public class RopUtil
         UUID uuid = UUID.randomUUID();
         return uuid.toString().toUpperCase();
     }
-
+    
     public static boolean equals(String... strs) {
         if(strs == null) {
             return false;
-        } else if(strs.length < 2) {
+        } else if(strs.length < RopConstant.CONSTANT_PARAMS_LENGTH) {
             throw new RuntimeException("Parameters can not be less than 2");
         } else {
             for(int i = 1; i < strs.length; ++i) {
@@ -141,7 +151,7 @@ public class RopUtil
     public static boolean equalsIgnoreCase(String... strs) {
         if(strs == null) {
             return false;
-        } else if(strs.length < 2) {
+        } else if(strs.length < RopConstant.CONSTANT_PARAMS_LENGTH) {
             throw new RuntimeException("Parameters can not be less than 2");
         } else {
             for(int i = 1; i < strs.length; ++i) {

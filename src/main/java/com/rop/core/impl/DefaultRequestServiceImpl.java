@@ -96,8 +96,13 @@ public class DefaultRequestServiceImpl implements RequestService
 			responseString = marshallerManager.messageFormat(requestFormat, result);
 		}catch(Exception e){
 
-			logger.error("processRequest occurred exception,  method:{}, version:{}, module:{}, appId:{}, requestId:{}, message:{}", method, v, module, requestContext.getAppId(), requestContext.getRequestId(), e.getCause().getMessage());
-			responseString = e.getCause().getMessage();
+			Throwable cause = e.getCause();
+			if(cause == null){
+				cause = e;
+			}
+			responseString = cause.getMessage();
+			logger.error("processRequest occurred exception,  method:{}, version:{}, module:{}, appId:{}, requestId:{}, message:{}", method, v, module, requestContext.getAppId(), requestContext.getRequestId(), responseString);
+
 			throw e;
 		}finally {
 			//获取logSn，优先级由高到低：logSn->orderNo->requestId

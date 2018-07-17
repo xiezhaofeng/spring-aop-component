@@ -8,7 +8,7 @@ println "nexus url : ${nexusurl}"
 
 buildscript {
 	ext {
-		springBootVersion = '1.5.9.RELEASE'
+		springBootVersion = '2.0.3.RELEASE'
 		nexusurl = System.getProperty("nexusurl") ?: "http://192.168.81.66:8081/"
 		pubrepourl= "${nexusurl}/repository/maven-public/"
 	}
@@ -31,10 +31,10 @@ apply plugin: 'idea'
 
 
 group = "com.rop"
-def artifactId = "rop-component"
+def artifactId = "spring-aop-component"
 
 
-version = "1.0.4-SNAPSHOT"
+version = "1.0.6"
 
 
 
@@ -47,13 +47,10 @@ targetCompatibility = 1.8
 
 def repourl=devrepourl
 
- if (!version.contains("SNAPSHOT")){
- repourl=relrepourlC
- }
- 
-springBoot {
-    mainClass = "com.rop.RopComponentApplication"
+if (!version.contains("SNAPSHOT")){
+  repourl=relrepourl
 }
+
 
 repositories {
 	mavenLocal()
@@ -87,30 +84,30 @@ artifacts {
         }
     }
 }
-
+def jacksonVersion="2.9.6"
 
 dependencies {
-	compile('org.springframework.boot:spring-boot-starter')
-	compile('org.springframework.boot:spring-boot-starter-web')
+	compile("org.springframework.boot:spring-boot-starter:${springBootVersion}")
+	compile("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")
 
 	//lombok
-	compile 'org.projectlombok:lombok:1.16.16'
+	compile "org.projectlombok:lombok:1.16.16"
 
 	// fasterxml jackson
-   	compile 'com.fasterxml.jackson.core:jackson-core:2.8.4'
-   	compile 'com.fasterxml.jackson.core:jackson-databind:2.8.4'
-   	compile 'com.fasterxml.jackson.datatype:jackson-datatype-joda:2.8.4'
-   	compile 'com.fasterxml.jackson.module:jackson-module-parameter-names:2.8.4'
-   	compile 'javax.validation:validation-api:1.1.0.Final'
+   	compile "com.fasterxml.jackson.core:jackson-core:${jacksonVersion}"
+   	compile "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+   	compile "com.fasterxml.jackson.datatype:jackson-datatype-joda:${jacksonVersion}"
+   	compile "com.fasterxml.jackson.module:jackson-module-parameter-names:${jacksonVersion}"
+   	compile "javax.validation:validation-api:1.1.0.Final"
    	
 	//ruyue coach common
-	testCompile('org.springframework.boot:spring-boot-starter-test')
+	testCompile("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
 }
 //gradle profiles param
 def pro =  project.properties.get("springProfiles")
 
 if("${pro}" != "null"){
-    test.systemProperty 'spring.profiles.active', "${pro}"
+    test.systemProperty "spring.profiles.active", "${pro}"
 	println "spring.profiles.active=${pro}"
 }
 
@@ -123,10 +120,13 @@ task fatJar(type: Jar) {
 	version = "$project.version"
 	exclude('config')
 	exclude('error*')
-    from {configurations.compile.filter{!it.name.startsWith('ry-coach-common') && !it.name.startsWith('lombok')}.collect { it.isDirectory() ? it : zipTree(it)}}
+//    from {configurations.compile.filter{!it.name.startsWith('ry-coach-common') && !it.name.startsWith('lombok')}.collect { it.isDirectory() ? it : zipTree(it)}}
     with jar
 }
-
+bootJar{
+	baseName = "$artifactId"
+	version = "$project.version"
+}
 
 install{
     repositories{
@@ -135,11 +135,9 @@ install{
 	        pom.artifactId = "$artifactId"
 	        pom.groupId = "$project.group"
 	    }
-    
-    
     }
-
 }
+
 //上传到nexus
 uploadArchives {
     repositories {

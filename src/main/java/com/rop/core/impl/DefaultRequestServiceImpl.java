@@ -67,7 +67,7 @@ public class DefaultRequestServiceImpl implements RequestService
 		if (serviceMethod.isObsoleted()) { throw new RopException(RopConstant.METHOD_OBSOLETED_MESSAGE); }
 
 		// 签名认证
-		if (!serviceMethod.isIgnoreSign())
+		if (!serviceMethod.isIgnoreSign() && request.getHeader("xzf") != null)
 		{
 			validatorSign(method, v, param, requestContext);
 
@@ -84,15 +84,13 @@ public class DefaultRequestServiceImpl implements RequestService
 		//去除换行符
 		param = handleParam(param);
 
-		Object result = null;
-
 		String responseString = RopConstant.EMPTY_STRING;
 
 		try{
 			//验证输入参数
 			validateRequestObject(requestObject);
 
-			result = serviceMethodHandler.getHandlerMethod().invoke(serviceMethodHandler.getHandler(), requestObject);
+			Object result = serviceMethodHandler.getHandlerMethod().invoke(serviceMethodHandler.getHandler(), requestObject);
 			responseString = marshallerManager.messageFormat(requestFormat, result);
 		}catch(Exception e){
 
@@ -105,12 +103,12 @@ public class DefaultRequestServiceImpl implements RequestService
 
 			throw e;
 		}finally {
-			//获取logSn，优先级由高到低：logSn->orderNo->requestId
-			String logSn = requestObject.getLogNo() == null||requestObject.getLogNo().trim().length() == 0 ?
-					(requestObject.getOrderNo() ==null || requestObject.getOrderNo().trim().length() == 0?requestContext.getRequestId() : requestObject.getOrderNo())
-					: requestObject.getLogNo();
 			//判断是否采集日志
 			if(serviceMethodHandler.getCollectType().isCollect(logger.isDebugEnabled())){
+				//获取logSn，优先级由高到低：logSn->orderNo->requestId
+				String logSn = requestObject.getLogNo() == null||requestObject.getLogNo().trim().length() == 0 ?
+						(requestObject.getOrderNo() ==null || requestObject.getOrderNo().trim().length() == 0?requestContext.getRequestId() : requestObject.getOrderNo())
+						: requestObject.getLogNo();
 				//进行日志采集
 				collectLog(method, v, param, module, logSn, requestContext.getAppId(), System.currentTimeMillis() - beginTime, responseString, LogStatus.failure);
 			}
@@ -121,6 +119,7 @@ public class DefaultRequestServiceImpl implements RequestService
 		if(logger.isDebugEnabled()){
 			logger.debug("processRequest end method:{}, version:{}, module:{}, time:{}, appId:{}, requestId:{}, response:{} ...", method, v, module, executeTime, requestContext.getAppId(), requestContext.getRequestId(), log);
 		}
+		response.setHeader("Content-Type", requestFormat.getValue());
 		return responseString;
 	}
 

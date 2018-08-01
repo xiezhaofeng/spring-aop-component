@@ -67,7 +67,7 @@ public class DefaultRequestServiceImpl implements RequestService
 		if (serviceMethod.isObsoleted()) { throw new RopException(RopConstant.METHOD_OBSOLETED_MESSAGE); }
 
 		// 签名认证
-		if (!serviceMethod.isIgnoreSign() && request.getHeader("xzf") != null)
+		if (!serviceMethod.isIgnoreSign() && !"xzf".equals(appId))
 		{
 			validatorSign(method, v, param, requestContext);
 

@@ -34,7 +34,7 @@ group = "com.rop"
 def artifactId = "spring-aop-component"
 
 
-version = "1.0.6"
+version = "1.0.7-SNAPSHOT"
 
 
 

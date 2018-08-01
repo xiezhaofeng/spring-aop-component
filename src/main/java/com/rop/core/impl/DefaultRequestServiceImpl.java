@@ -8,8 +8,10 @@ import com.rop.exception.RopException;
 import com.rop.marshaller.MarshallerManager;
 import com.rop.util.RopConstant;
 import com.rop.util.RopUtil;
+import com.sun.net.httpserver.Headers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import javax.servlet.http.HttpServletRequest;
@@ -51,7 +53,7 @@ public class DefaultRequestServiceImpl implements RequestService
 	}
 
 	@Override
-	public String processRequest(HttpServletRequest request, HttpServletResponse response, String module, String method, String v, String appId, String param) throws Exception
+	public Object processRequest(HttpServletRequest request, HttpServletResponse response, String module, String method, String v, String appId, String param) throws Exception
 	{
 		long beginTime = System.currentTimeMillis();
 		if(logger.isDebugEnabled()){
@@ -65,6 +67,10 @@ public class DefaultRequestServiceImpl implements RequestService
 		ServiceMethodDefinition serviceMethod = requestContext.getServiceMethodDefinition();
 
 		if (serviceMethod.isObsoleted()) { throw new RopException(RopConstant.METHOD_OBSOLETED_MESSAGE); }
+
+		if(request.getHeader(HttpHeaders.ACCEPT) == null){
+			response.setHeader(HttpHeaders.ACCEPT, requestFormat.getValue());
+		}
 
 		// 签名认证
 		if (!serviceMethod.isIgnoreSign() && request.getHeader("xzf") != null)
@@ -85,12 +91,12 @@ public class DefaultRequestServiceImpl implements RequestService
 		param = handleParam(param);
 
 		String responseString = RopConstant.EMPTY_STRING;
+		Object result;
 
 		try{
 			//验证输入参数
 			validateRequestObject(requestObject);
-
-			Object result = serviceMethodHandler.getHandlerMethod().invoke(serviceMethodHandler.getHandler(), requestObject);
+			result = serviceMethodHandler.getHandlerMethod().invoke(serviceMethodHandler.getHandler(), requestObject);
 			responseString = marshallerManager.messageFormat(requestFormat, result);
 		}catch(Exception e){
 
@@ -119,8 +125,8 @@ public class DefaultRequestServiceImpl implements RequestService
 		if(logger.isDebugEnabled()){
 			logger.debug("processRequest end method:{}, version:{}, module:{}, time:{}, appId:{}, requestId:{}, response:{} ...", method, v, module, executeTime, requestContext.getAppId(), requestContext.getRequestId(), log);
 		}
-		response.setHeader("Content-Type", requestFormat.getValue());
-		return responseString;
+//		response.setHeader("Content-Type", requestFormat.getValue());
+		return result;
 	}
 
 	private void collectLog(String method, String v, String param, String module, String logSn, String appId, long l, String response, LogStatus logStatus) {

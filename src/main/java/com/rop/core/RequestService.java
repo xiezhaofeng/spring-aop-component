@@ -29,5 +29,5 @@ public interface RequestService
 	 * @return
 	 * @throws Exception
 	 */
-	String processRequest(HttpServletRequest request, HttpServletResponse response, String module, String method, String v, String appId, String param) throws Exception;
+	Object processRequest(HttpServletRequest request, HttpServletResponse response, String module, String method, String v, String appId, String param) throws Exception;
 }

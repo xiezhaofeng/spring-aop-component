@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
+import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -98,9 +99,15 @@ public class DefaultRequestServiceImpl implements RequestService
 			if(cause == null){
 				cause = e;
 			}
+
 			responseString = cause.getMessage();
 			logger.error("processRequest occurred exception,  method:{}, version:{}, module:{}, appId:{}, requestId:{}, message:{}", method, v, module, requestContext.getAppId(), requestContext.getRequestId(), responseString);
-
+			if(e instanceof InvocationTargetException){
+				throw (Exception)((InvocationTargetException) e).getTargetException();
+			}
+			if(cause != null){
+				throw (Exception)cause;
+			}
 			throw e;
 		}finally {
 			//判断是否采集日志
